@@ -28,10 +28,12 @@ use_example = st.sidebar.checkbox('Use example multi-omics data', value=True)
 if use_example:
     data_dict = load_example_data()
     st.sidebar.success('✅ Example multi-omics data loaded')
-    st.sidebar.write(f"- Expression: {data_dict['expression'].shape}")
-    st.sidebar.write(f"- Methylation: {data_dict['methylation'].shape}")
-    st.sidebar.write(f"- CNV: {data_dict['cnv'].shape}")
-    st.sidebar.write(f"- Mutations: {data_dict['mutations'].shape}")
+    st.sidebar.write(f"**Total Samples: {data_dict['expression'].shape[1]}**")
+    st.sidebar.write(f"- Expression: {data_dict['expression'].shape[0]} features × {data_dict['expression'].shape[1]} samples")
+    st.sidebar.write(f"- Methylation: {data_dict['methylation'].shape[0]} features × {data_dict['methylation'].shape[1]} samples")
+    st.sidebar.write(f"- CNV: {data_dict['cnv'].shape[0]} features × {data_dict['cnv'].shape[1]} samples")
+    st.sidebar.write(f"- Mutations: {data_dict['mutations'].shape[0]} features × {data_dict['mutations'].shape[1]} samples")
+    st.sidebar.write(f"- Drug Response: {len(data_dict['drug_response'])} samples")
 else:
     uploaded = st.sidebar.file_uploader(
         'Upload multi-omics CSV files',
@@ -60,6 +62,7 @@ with tab1:
     
     with col1:
         st.subheader('📊 Data Summary')
+        st.metric("Total Samples", f"{data_dict['expression'].shape[1]}", help="Number of patients/samples in the dataset")
         for omic_type, df in data_dict.items():
             if omic_type != 'drug_response':
                 st.metric(
