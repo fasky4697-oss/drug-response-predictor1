@@ -148,10 +148,16 @@ with tab2:
             st.dataframe(latent_df.head())
             
             # UMAP/PCA visualization
+                        # 2D visualization
             st.subheader('🗺️ 2D Visualization')
-            umap_fig = umap_from_latent(latent_df)
-            if umap_fig is not None:
-                st.plotly_chart(umap_fig, use_container_width=True)
+            if latent_df.shape[1] >= 2:
+                df_plot = latent_df.iloc[:, :2].reset_index().rename(columns={'index':'sample'})
+                col1, col2 = df_plot.columns[1], df_plot.columns[2]
+                
+                import plotly.express as px
+                fig = px.scatter(df_plot, x=col1, y=col2, 
+                               title="2D Visualization of Integrated Multi-Omics Data")
+                st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("📊 Visualization not available - need at least 2 dimensions")
 
