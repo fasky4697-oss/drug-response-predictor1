@@ -81,9 +81,15 @@ with tab1:
                     drug_df, 
                     x=response_col, 
                     title="Drug Response Distribution",
-                    color_discrete_sequence=['#FF6B6B']
+                    color_discrete_sequence=['#FF6B6B'],
+                    nbins=15
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(
+                    bargap=0.1,
+                    xaxis_title="Drug Response Value",
+                    yaxis_title="Frequency"
+                )
+                st.plotly_chart(fig, width='stretch')
     
     # Show sample data previews
     st.subheader('🔍 Data Previews')
@@ -133,7 +139,7 @@ with tab2:
             # UMAP visualization
             st.subheader('🗺️ UMAP Visualization')
             umap_fig = umap_from_latent(latent_df)
-            st.plotly_chart(umap_fig, use_container_width=True)
+            st.plotly_chart(umap_fig, width='stretch')
 
 with tab3:
     st.header('🤖 Machine Learning Models')
@@ -187,7 +193,7 @@ with tab3:
                         })
                     
                     performance_df = pd.DataFrame(performance_data)
-                    st.dataframe(performance_df, use_container_width=True)
+                    st.dataframe(performance_df, width='stretch')
                     
                     # Visualization of predictions vs actual
                     if 'y_test' in st.session_state:
@@ -229,7 +235,7 @@ with tab3:
                         fig.update_layout(height=400, title_text="Model Predictions vs Actual Values")
                         fig.update_xaxes(title_text="Actual Values")
                         fig.update_yaxes(title_text="Predicted Values")
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
 
 with tab4:
     st.header('🎯 Molecular Subtype Analysis')
@@ -264,9 +270,9 @@ with tab4:
                     values=subtype_counts.values,
                     names=subtype_counts.index,
                     title="Distribution of Molecular Subtypes",
-                    color_discrete_sequence=px.colors.qualitative.Set3
+                    color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
                 
                 # Subtype visualization in latent space
                 st.subheader('🗺️ Subtypes in Latent Space')
@@ -282,9 +288,9 @@ with tab4:
                     color='Molecular_Subtype',
                     hover_data=['index'],
                     title="Molecular Subtypes in Latent Factor Space",
-                    color_discrete_sequence=px.colors.qualitative.Set3
+                    color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
 with tab5:
     st.header('💊 Personalized Drug Recommendations')
@@ -343,14 +349,14 @@ with tab5:
                     showlegend=False
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
                 
                 # Show detailed predictions
                 pred_table = pd.DataFrame({
                     'Model': list(model_predictions.keys()),
                     'Predicted Response': [f"{val:.3f}" for val in model_predictions.values()]
                 })
-                st.dataframe(pred_table, use_container_width=True)
+                st.dataframe(pred_table, width='stretch')
         
         # Subtype-based analysis
         if subtypes is not None:
@@ -368,7 +374,7 @@ with tab5:
                 color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1']
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
             
             # Show subtype recommendations
             st.subheader('🎯 Subtype-Specific Recommendations')

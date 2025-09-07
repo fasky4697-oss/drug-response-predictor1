@@ -9,28 +9,58 @@ def load_example_data():
     expr = pd.read_csv(expr_csv, index_col=0)
     target = pd.read_csv(target_csv)
     
-    # Generate synthetic multi-omics data for demo
-    n_samples = expr.shape[1]
+    # Extend samples to have more data points
+    np.random.seed(42)  # For reproducible results
+    n_original_samples = expr.shape[1]
+    n_target_samples = 50  # Increase to 50 samples
     
+    # Create additional samples by adding noise to existing ones
+    additional_samples = n_target_samples - n_original_samples
+    if additional_samples > 0:
+        # Extend expression data
+        new_expr_data = []
+        new_sample_names = []
+        for i in range(additional_samples):
+            base_sample = expr.iloc[:, i % n_original_samples]
+            noise = np.random.normal(0, 0.1, size=base_sample.shape)
+            new_sample = base_sample + noise
+            new_expr_data.append(new_sample)
+            new_sample_names.append(f'Sample_{n_original_samples + i + 1}')
+        
+        new_expr_df = pd.DataFrame(new_expr_data, columns=expr.index).T
+        new_expr_df.columns = new_sample_names
+        expr = pd.concat([expr, new_expr_df], axis=1)
+        
+        # Extend drug response data
+        for i in range(additional_samples):
+            base_response = target.iloc[i % len(target)].copy()
+            base_response.iloc[0] = f'Sample_{n_original_samples + i + 1}'
+            base_response.iloc[1] = base_response.iloc[1] + np.random.normal(0, 0.3)
+            target = pd.concat([target, base_response.to_frame().T], ignore_index=True)
+    
+    n_samples = expr.shape[1]
+    all_sample_names = expr.columns.tolist()
+    
+    # Generate synthetic multi-omics data for demo
     # Synthetic methylation data
     methylation = pd.DataFrame(
         np.random.beta(2, 5, size=(200, n_samples)),
         index=[f'CpG_{i}' for i in range(200)],
-        columns=expr.columns
+        columns=all_sample_names
     )
     
     # Synthetic copy number variation data
     cnv = pd.DataFrame(
         np.random.normal(0, 0.3, size=(150, n_samples)),
         index=[f'CNV_{i}' for i in range(150)],
-        columns=expr.columns
+        columns=all_sample_names
     )
     
     # Synthetic mutation data (binary)
     mutations = pd.DataFrame(
         np.random.binomial(1, 0.1, size=(100, n_samples)),
         index=[f'MUT_{i}' for i in range(100)],
-        columns=expr.columns
+        columns=all_sample_names
     )
     
     return {
