@@ -2,7 +2,12 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-import umap
+try:
+    import umap
+    UMAP_AVAILABLE = True
+except ImportError:
+    UMAP_AVAILABLE = False
+    umap = None
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -124,7 +129,7 @@ def run_pca(expr_df, n_components=4):
     return pd.DataFrame(Z, index=expr_df.columns, columns=cols)
 
 def umap_from_latent(latent_df):
-    reducer = umap.UMAP(n_components=2, random_state=42)
+    reducer = umap.UMAP(n_components=2, random_state=42)  # ← ใช้ UMAP ตรงนี้
     embedding = reducer.fit_transform(latent_df.values)
     df = pd.DataFrame(embedding, index=latent_df.index, columns=['UMAP1','UMAP2'])
     df_plot = df.reset_index().rename(columns={'index':'sample'})
