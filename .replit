@@ -3,6 +3,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["glibcLocales"]
 
 [unitTest]
 language = "python3"
@@ -16,3 +17,31 @@ deploymentTarget = "cloudrun"
 
 [agent]
 expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Drug Response Predictor"
+
+[[workflows.workflow]]
+name = "Drug Response Predictor"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c \"cd drug-response-predictor && python -m streamlit run app/streamlit_app.py --server.headless=true --server.address=0.0.0.0 --server.port=5000 --browser.gatherUsageStats=false\""
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
