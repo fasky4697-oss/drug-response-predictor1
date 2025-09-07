@@ -109,6 +109,6 @@ def train_rf(latent_df, y_series, test_size=0.2, random_state=42):
 def evaluate_regression(y_true, y_pred):
     return {
         'R²': float(r2_score(y_true, y_pred)),
-        'RMSE': float(mean_squared_error(y_true, y_pred, squared=False)),
+        'RMSE': float(np.sqrt(mean_squared_error(y_true, y_pred))),
         'MAE': float(np.mean(np.abs(y_true - y_pred)))
     }

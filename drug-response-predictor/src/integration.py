@@ -77,6 +77,43 @@ def pca_each_omic(data_dict, n_components_per_omic=3):
     integrated_df = pd.concat(latent_factors_list, axis=1)
     return integrated_df
 
+def weighted_pca_integration(data_dict, n_components=10):
+    """Weighted PCA integration with different weights for each omic type"""
+    omics_data = []
+    feature_origins = []
+    sample_names = None
+    weights = {'expression': 0.4, 'methylation': 0.25, 'cnv': 0.25, 'mutations': 0.1}
+    
+    for omic_type, df in data_dict.items():
+        if omic_type == 'drug_response':
+            continue
+        
+        # Standardize each omic type
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(df.T)  # samples x features
+        
+        # Apply weight
+        weight = weights.get(omic_type, 0.25)
+        weighted_data = scaled_data * weight
+        
+        omics_data.append(weighted_data)
+        feature_origins.extend([omic_type] * df.shape[0])
+        
+        if sample_names is None:
+            sample_names = df.columns.tolist()
+    
+    # Concatenate all weighted omics
+    integrated_matrix = np.hstack(omics_data)
+    
+    # Apply PCA to reduce dimensionality
+    pca = PCA(n_components=min(n_components, integrated_matrix.shape[1]))
+    latent_factors = pca.fit_transform(integrated_matrix)
+    
+    cols = [f'WLF{i+1}' for i in range(latent_factors.shape[1])]
+    result_df = pd.DataFrame(latent_factors, index=sample_names, columns=cols)
+    
+    return result_df, pca, feature_origins
+
 def run_pca(expr_df, n_components=4):
     """Legacy function for backward compatibility"""
     # expr_df: genes x samples -> we want samples x genes
