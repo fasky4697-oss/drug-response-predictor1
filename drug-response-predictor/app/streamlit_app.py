@@ -4,7 +4,15 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import sys
+import os
 
+# Add the parent directory to the path so we can import src modules
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+    
 from src.data_connectors import load_example_data, read_uploaded_csvs
 from src.preprocessing import harmonize_expression, prepare_target
 from src.integration import integrate_multi_omics, pca_each_omic, umap_from_latent, run_pca
