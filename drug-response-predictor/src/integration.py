@@ -2,13 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-# Optional UMAP import with fallback
-try:
-    import umap
-    UMAP_AVAILABLE = True
-except ImportError:
-    UMAP_AVAILABLE = False
-    umap = None
+# UMAP removed due to dependency compatibility issues
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -130,25 +124,13 @@ def run_pca(expr_df, n_components=4):
     return pd.DataFrame(Z, index=expr_df.columns, columns=cols)
 
 def umap_from_latent(latent_df):
-    """Generate 2D visualization from latent factors using UMAP or PCA fallback"""
-    if UMAP_AVAILABLE and umap is not None:
-        try:
-            reducer = umap.UMAP(n_components=2, random_state=42)
-            embedding = reducer.fit_transform(latent_df.values)
-            df = pd.DataFrame(embedding, index=latent_df.index, columns=['UMAP1','UMAP2'])
-            df_plot = df.reset_index().rename(columns={'index':'sample'})
-            fig = px.scatter(df_plot, x='UMAP1', y='UMAP2', hover_data=['sample'], 
-                           title="UMAP Visualization of Integrated Multi-Omics Data")
-            return fig
-        except Exception:
-            pass  # Fall through to PCA fallback
-    
-    # PCA fallback when UMAP not available
+    """Generate 2D visualization from latent factors using PCA (UMAP optional)"""
+    # Always use PCA for now (UMAP has dependency issues in some environments)
     if latent_df.shape[1] >= 2:
         df_plot = latent_df.iloc[:, :2].reset_index().rename(columns={'index':'sample'})
         col1, col2 = df_plot.columns[1], df_plot.columns[2]
         fig = px.scatter(df_plot, x=col1, y=col2, hover_data=['sample'],
-                       title="PCA Visualization of Integrated Multi-Omics Data")
+                       title="2D Visualization of Integrated Multi-Omics Data")
         return fig
     
     return None
