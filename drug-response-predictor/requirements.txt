@@ -1,0 +1,8 @@
+streamlit>=1.18
+pandas
+numpy
+scikit-learn
+plotly
+umap-learn
+joblib
+shap
