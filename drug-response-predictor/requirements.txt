@@ -6,4 +6,3 @@ plotly
 umap-learn
 joblib
 shap
-umap-learn>=0.5.0
