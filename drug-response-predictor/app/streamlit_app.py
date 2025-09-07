@@ -12,7 +12,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
-    
+
 from src.data_connectors import load_example_data, read_uploaded_csvs
 from src.preprocessing import harmonize_expression, prepare_target
 from src.integration import integrate_multi_omics, pca_each_omic, umap_from_latent, run_pca
@@ -100,7 +100,7 @@ with tab1:
                     xaxis_title="Drug Response Value",
                     yaxis_title="Frequency"
                 )
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
     
     # Show sample data previews
     st.subheader('🔍 Data Previews')
@@ -147,29 +147,13 @@ with tab2:
             latent_df = st.session_state['latent_df']
             st.dataframe(latent_df.head())
             
-            # UMAP visualization
-            # แทนที่ umap_fig = umap_from_latent(latent_df)
-# st.plotly_chart(umap_fig, width='stretch')
-
-# เป็น:
-try:
-    umap_fig = umap_from_latent(latent_df)
-    if umap_fig is not None:
-        st.plotly_chart(umap_fig, use_container_width=True)
-    else:
-        st.info("📊 UMAP visualization not available. Install umap-learn for advanced dimensionality reduction.")
-except Exception as e:
-    st.warning("⚠️ UMAP visualization failed. Showing PCA visualization instead.")
-    
-    # Alternative: แสดง PCA scatter plot แทน
-    if latent_df.shape[1] >= 2:
-        fig_alt = px.scatter(
-            x=latent_df.iloc[:, 0], 
-            y=latent_df.iloc[:, 1],
-            labels={'x': latent_df.columns[0], 'y': latent_df.columns[1]},
-            title="PCA Visualization (2D)"
-        )
-        st.plotly_chart(fig_alt, use_container_width=True)
+            # UMAP/PCA visualization
+            st.subheader('🗺️ 2D Visualization')
+            umap_fig = umap_from_latent(latent_df)
+            if umap_fig is not None:
+                st.plotly_chart(umap_fig, use_container_width=True)
+            else:
+                st.info("📊 Visualization not available - need at least 2 dimensions")
 
 with tab3:
     st.header('🤖 Machine Learning Models')
@@ -265,7 +249,7 @@ with tab3:
                         fig.update_layout(height=400, title_text="Model Predictions vs Actual Values")
                         fig.update_xaxes(title_text="Actual Values")
                         fig.update_yaxes(title_text="Predicted Values")
-                        st.plotly_chart(fig, width='stretch')
+                        st.plotly_chart(fig, use_container_width=True)
 
 with tab4:
     st.header('🎯 Molecular Subtype Analysis')
@@ -302,7 +286,7 @@ with tab4:
                     title="Distribution of Molecular Subtypes",
                     color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
                 )
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
                 
                 # Subtype visualization in latent space
                 st.subheader('🗺️ Subtypes in Latent Space')
@@ -320,7 +304,7 @@ with tab4:
                     title="Molecular Subtypes in Latent Factor Space",
                     color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
                 )
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
 
 with tab5:
     st.header('💊 Personalized Drug Recommendations')
@@ -379,7 +363,7 @@ with tab5:
                     showlegend=False
                 )
                 
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
                 
                 # Show detailed predictions
                 pred_table = pd.DataFrame({
