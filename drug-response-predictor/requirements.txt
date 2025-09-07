@@ -3,6 +3,6 @@ pandas
 numpy
 scikit-learn
 plotly
-umap-learn==0.5.3
+umap-learn
 joblib
 shap
