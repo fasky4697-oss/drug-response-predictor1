@@ -148,9 +148,28 @@ with tab2:
             st.dataframe(latent_df.head())
             
             # UMAP visualization
-            st.subheader('🗺️ UMAP Visualization')
-            umap_fig = umap_from_latent(latent_df)
-            st.plotly_chart(umap_fig, width='stretch')
+            # แทนที่ umap_fig = umap_from_latent(latent_df)
+# st.plotly_chart(umap_fig, width='stretch')
+
+# เป็น:
+try:
+    umap_fig = umap_from_latent(latent_df)
+    if umap_fig is not None:
+        st.plotly_chart(umap_fig, use_container_width=True)
+    else:
+        st.info("📊 UMAP visualization not available. Install umap-learn for advanced dimensionality reduction.")
+except Exception as e:
+    st.warning("⚠️ UMAP visualization failed. Showing PCA visualization instead.")
+    
+    # Alternative: แสดง PCA scatter plot แทน
+    if latent_df.shape[1] >= 2:
+        fig_alt = px.scatter(
+            x=latent_df.iloc[:, 0], 
+            y=latent_df.iloc[:, 1],
+            labels={'x': latent_df.columns[0], 'y': latent_df.columns[1]},
+            title="PCA Visualization (2D)"
+        )
+        st.plotly_chart(fig_alt, use_container_width=True)
 
 with tab3:
     st.header('🤖 Machine Learning Models')
