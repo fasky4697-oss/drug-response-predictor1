@@ -73,6 +73,7 @@ def load_example_data():
 
 def read_uploaded_csvs(uploaded_files):
     """Read multiple CSV files for multi-omics data.
+    Auto-detect file types from filename or use upload order as fallback.
     Expected files: expression, methylation, cnv, mutations, drug_response
     Return dict of DataFrames or None on failure."""
     if not uploaded_files or len(uploaded_files) < 1:
@@ -80,19 +81,49 @@ def read_uploaded_csvs(uploaded_files):
     
     data_dict = {}
     file_types = ['expression', 'methylation', 'cnv', 'mutations', 'drug_response']
+    used_types = set()
+    
+    def detect_file_type(filename):
+        """Detect file type from filename"""
+        filename_lower = filename.lower()
+        if 'expression' in filename_lower or 'expr' in filename_lower or 'gene' in filename_lower:
+            return 'expression'
+        elif 'methylation' in filename_lower or 'methyl' in filename_lower or 'cpg' in filename_lower:
+            return 'methylation'
+        elif 'cnv' in filename_lower or 'copy' in filename_lower:
+            return 'cnv'
+        elif 'mutation' in filename_lower or 'mut' in filename_lower:
+            return 'mutations'
+        elif 'drug' in filename_lower or 'response' in filename_lower or 'target' in filename_lower:
+            return 'drug_response'
+        return None
     
     try:
-        for i, file in enumerate(uploaded_files):
+        # First pass: try to detect from filename
+        for file in uploaded_files:
             df = pd.read_csv(file)
             # if first column looks like identifiers, set as index
             if df.columns[0].lower() in ('gene','gene_id','genes','id','feature','cpg','mutation'):
                 df = df.set_index(df.columns[0])
             
-            # Assign to data type based on file order or name
-            if i < len(file_types):
-                data_dict[file_types[i]] = df
-            else:
-                data_dict[f'data_{i}'] = df
+            file_type = detect_file_type(file.name)
+            if file_type and file_type not in used_types:
+                data_dict[file_type] = df
+                used_types.add(file_type)
+        
+        # Second pass: assign remaining files by order for files that couldn't be detected
+        remaining_types = [ft for ft in file_types if ft not in used_types]
+        file_idx = 0
+        
+        for file in uploaded_files:
+            file_type = detect_file_type(file.name)
+            # If file type not detected or file wasn't processed in first pass
+            if file_type is None and file_idx < len(remaining_types):
+                df = pd.read_csv(file)
+                if df.columns[0].lower() in ('gene','gene_id','genes','id','feature','cpg','mutation'):
+                    df = df.set_index(df.columns[0])
+                data_dict[remaining_types[file_idx]] = df
+                file_idx += 1
         
         return data_dict if data_dict else None
     except Exception as e:
